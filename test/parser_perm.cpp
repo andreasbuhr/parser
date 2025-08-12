@@ -14,6 +14,17 @@
 namespace bp = boost::parser;
 using namespace std::literals;
 
+struct data
+{
+    int i;
+    char c;
+};
+
+constexpr bp::rule<struct data_tag, data> data_rule = "data";
+auto data_rule_def =
+    (bp::lit("i=") >> bp::int_) || (bp::lit("c=") >> bp::char_);
+BOOST_PARSER_DEFINE_RULES(data_rule);
+
 int main()
 {
     {
@@ -38,6 +49,21 @@ int main()
             auto result = bp::parse("foo42", parser, bp::ws);
             BOOST_TEST(result);
             BOOST_TEST(*result == (bp::tuple<int, std::string>(42, "foo"s)));
+        }
+    }
+
+    {
+        {
+            auto result = bp::parse("i=42 c=g", data_rule, bp::ws);
+            BOOST_TEST(result);
+            BOOST_TEST(result->i == 42);
+            BOOST_TEST(result->c == 'g');
+        }
+        {
+            auto result = bp::parse("c=g i=42", data_rule, bp::ws);
+            BOOST_TEST(result);
+            BOOST_TEST(result->i == 42);
+            BOOST_TEST(result->c == 'g');
         }
     }
 
