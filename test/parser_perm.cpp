@@ -14,6 +14,9 @@
 namespace bp = boost::parser;
 using namespace std::literals;
 
+namespace
+{
+
 struct data
 {
     int i;
@@ -24,6 +27,8 @@ constexpr bp::rule<struct data_tag, data> data_rule = "data";
 auto data_rule_def =
     (bp::lit("i=") >> bp::int_) || (bp::lit("c=") >> bp::char_);
 BOOST_PARSER_DEFINE_RULES(data_rule);
+
+} // namespace
 
 int main()
 {
