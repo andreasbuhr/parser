@@ -3224,19 +3224,32 @@ namespace boost { namespace parser {
             //]
 
             //[ opt_parser_skip
+            auto const prev_first = first;
             detail::skip(first, last, skip, flags);
             //]
 
+            bool local_success = true;
+
             //[ opt_parser_no_gen_attr_path
             if (!detail::gen_attrs(flags)) {
-                parser_.call(first, last, context, skip, flags, success);
+                parser_.call(first, last, context, skip, flags, local_success);
+                if (!local_success)
+                    first = prev_first;
                 success = true;
                 return;
             }
             //]
 
             //[ opt_parser_gen_attr_path
-            parser_.call(first, last, context, skip, flags, success, retval);
+            Attribute attr{};
+            parser_.call(
+                first, last, context, skip, flags, local_success, attr);
+            if (local_success) {
+                detail::assign(retval, std::move(attr));
+            } else {
+                detail::assign(retval, Attribute());
+                first = prev_first;
+            }
             success = true;
             //]
         }
