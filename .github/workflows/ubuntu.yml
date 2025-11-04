@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        compiler_version: [g++-10, g++-11]
+        compiler_version: [g++-10, g++-11, clang++-13]
         cxx_std: [17, 20]
         os: [ubuntu-22.04]
 
