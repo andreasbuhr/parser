@@ -14,6 +14,7 @@
 #include <boost/parser/detail/stl_interfaces/view_adaptor.hpp>
 
 #include <climits>
+#include <type_traits>
 
 
 namespace boost::parser::detail { namespace text {
@@ -514,11 +515,19 @@ namespace boost::parser::detail { namespace text {
 #endif
         constexpr utf_view(V base) : base_{std::move(base)} {}
 
-        constexpr V base() const &
 #if BOOST_PARSER_DETAIL_TEXT_USE_CONCEPTS
+        constexpr V base() const &
             requires std::copy_constructible<V>
+        {
+            return base_;
+        }
+#else
+        constexpr auto base() const &
+            -> std::enable_if_t<std::is_copy_constructible<V>::value, V>
+        {
+            return base_;
+        }
 #endif
-        { return base_; }
         constexpr V base() && { return std::move(base_); }
 
         constexpr auto begin()
