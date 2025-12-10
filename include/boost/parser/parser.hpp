@@ -3152,7 +3152,7 @@ namespace boost { namespace parser {
             typename SkipParser>
         auto call(
             Iter & first,
-            Sentinel last,
+            Sentinel const & last,
             Context const & context,
             SkipParser const & skip,
             detail::flags flags,
@@ -3173,7 +3173,7 @@ namespace boost { namespace parser {
             typename Attribute>
         void call(
             Iter & first,
-            Sentinel last,
+            Sentinel const & last,
             Context const & context,
             SkipParser const & skip,
             detail::flags flags,
@@ -3316,7 +3316,7 @@ namespace boost { namespace parser {
             typename SkipParser>
         auto call(
             Iter & first,
-            Sentinel last,
+            Sentinel const & last,
             Context const & context,
             SkipParser const & skip,
             detail::flags flags,
@@ -3339,7 +3339,7 @@ namespace boost { namespace parser {
             typename Attribute>
         void call(
             Iter & first,
-            Sentinel last,
+            Sentinel const & last,
             Context const & context,
             SkipParser const & skip,
             detail::flags flags,
