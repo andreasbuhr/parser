@@ -593,10 +593,12 @@ namespace boost { namespace parser { namespace detail {
     }
 
     template<typename Context, typename T>
-    auto resolve(Context const & context, T const & x);
+    decltype(auto) resolve(Context const & context, T const & x);
 
     template<typename Context>
     auto resolve(Context const &, nope n);
+
+#if BOOST_PARSER_DO_TRACE
 
     template<
         bool DoTrace,
@@ -691,6 +693,8 @@ namespace boost { namespace parser { namespace detail {
             return scoped_trace_t<false, Iter, Sentinel, Context, Attribute>{};
         }
     }
+
+#endif
 
     template<typename Context, typename Attribute>
     auto final_trace(Context const & context, flags f, Attribute const & attr)
