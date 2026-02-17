@@ -3771,7 +3771,7 @@ namespace boost { namespace parser {
             typename Sentinel,
             typename Context,
             typename SkipParser,
-            typename... Ts,
+            typename Attribute,
             int... Is>
         void call_impl(
             Iter & first,
@@ -3780,10 +3780,10 @@ namespace boost { namespace parser {
             SkipParser const & skip,
             detail::flags flags,
             bool & success,
-            tuple<Ts...> & retval,
+            Attribute & retval,
             std::integer_sequence<int, Is...>) const
         {
-            std::array<bool, sizeof...(Ts)> used_parsers = {{}};
+            std::array<bool, detail::tuple_size_<ParserTuple>> used_parsers = {{}};
 
             // Use "parser" to fill in attribute "x", unless "parser" has
             // previously been used.
@@ -3824,7 +3824,7 @@ namespace boost { namespace parser {
             success = (parsed_one(Is) && ...);
 
             if (!success)
-                retval = tuple<Ts...>{};
+                detail::assign(retval, Attribute());
         }
 
 #ifndef BOOST_PARSER_DOXYGEN
