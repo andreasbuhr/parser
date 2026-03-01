@@ -7641,6 +7641,113 @@ namespace boost { namespace parser {
         decltype(detail::make_view_begin(r)),
         decltype(detail::make_view_end(r))>;
 
+    template<typename StrIter, typename StrSentinel>
+    struct omit_string_parser
+    {
+        constexpr omit_string_parser() : expected_first_(), expected_last_() {}
+
+#if BOOST_PARSER_USE_CONCEPTS
+        template<parsable_range_like R>
+#else
+        template<
+            typename R,
+            typename Enable =
+                std::enable_if_t<detail::is_parsable_range_like_v<R>>>
+#endif
+        constexpr omit_string_parser(R && r) :
+            expected_first_(detail::make_view_begin(r)),
+            expected_last_(detail::make_view_end(r))
+        {}
+
+        template<
+            typename Iter,
+            typename Sentinel,
+            typename Context,
+            typename SkipParser>
+        detail::nope call(
+            Iter & first,
+            Sentinel last,
+            Context const & context,
+            SkipParser const & skip,
+            detail::flags flags,
+            bool & success) const
+        {
+            detail::nope retval;
+            call(first, last, context, skip, flags, success, retval);
+            return retval;
+        }
+
+        template<
+            typename Iter,
+            typename Sentinel,
+            typename Context,
+            typename SkipParser,
+            typename Attribute>
+        void call(
+            Iter & first,
+            Sentinel last,
+            Context const & context,
+            SkipParser const & skip,
+            detail::flags flags,
+            bool & success,
+            Attribute & retval) const
+        {
+            [[maybe_unused]] auto _ = detail::scoped_trace(
+                *this, first, last, context, flags, retval);
+
+            if (first == last) {
+                success = false;
+                return;
+            }
+
+            if constexpr (std::is_same_v<
+                              detail::remove_cv_ref_t<decltype(*first)>,
+                              char32_t>) {
+                auto const cps =
+                    BOOST_PARSER_SUBRANGE(expected_first_, expected_last_) |
+                    detail::text::as_utf32;
+
+                auto const mismatch = detail::no_case_aware_string_mismatch(
+                    first,
+                    last,
+                    cps.begin(),
+                    cps.end(),
+                    context.no_case_depth_);
+                if (mismatch.second != cps.end()) {
+                    success = false;
+                    return;
+                }
+
+                first = mismatch.first;
+            } else {
+                auto const mismatch = detail::no_case_aware_string_mismatch(
+                    first,
+                    last,
+                    expected_first_,
+                    expected_last_,
+                    context.no_case_depth_);
+                if (mismatch.second != expected_last_) {
+                    success = false;
+                    return;
+                }
+
+                first = mismatch.first;
+            }
+        }
+
+        StrIter expected_first_;
+        StrSentinel expected_last_;
+    };
+
+#if BOOST_PARSER_USE_CONCEPTS
+    template<parsable_range_like R>
+#else
+    template<typename R>
+#endif
+    omit_string_parser(R r) -> omit_string_parser<
+        decltype(detail::make_view_begin(r)),
+        decltype(detail::make_view_end(r))>;
+
 #endif
 
     /** Returns a parser that matches `str` that produces the matched string
@@ -8021,7 +8128,7 @@ namespace boost { namespace parser {
 #endif
     constexpr auto lit(R && str) noexcept
     {
-        return omit[parser::string(str)];
+        return parser_interface{omit_string_parser(str)};
     }
 
 #ifndef BOOST_PARSER_DOXYGEN

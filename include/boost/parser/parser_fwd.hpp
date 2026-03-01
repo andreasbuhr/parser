@@ -380,6 +380,10 @@ namespace boost { namespace parser {
     template<typename StrIter, typename StrSentinel>
     struct string_parser;
 
+    /** Matches a particular string, producing no attribute. */
+    template<typename StrIter, typename StrSentinel>
+    struct omit_string_parser;
+
     /** Matches a string delimited by quotation marks; produces a
         `std::string` attribute. */
     template<

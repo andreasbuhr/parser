@@ -714,6 +714,23 @@ namespace boost { namespace parser { namespace detail {
         os << "\"";
     }
 
+    template<typename Context, typename StrIter, typename StrSentinel>
+    void print_parser(
+        Context const & context,
+        omit_string_parser<StrIter, StrSentinel> const & parser,
+        std::ostream & os,
+        int components)
+    {
+        os << "\"";
+        for (auto c : BOOST_PARSER_DETAIL_TEXT_SUBRANGE(
+                          parser.expected_first_,
+                          parser.expected_last_) |
+                          text::as_utf8) {
+            detail::print_char(os, c);
+        }
+        os << "\"";
+    }
+
     template<
         typename Context,
         typename Quotes,
